@@ -1,9 +1,8 @@
 import {test, expect} from '@playwright/test';
 import { LoginPage } from '../../pages/LoginPage';
 import dotenv from 'dotenv';
-dotenv.config(); // Load environment variables from .env file
-import { requireEnv } from '../utils/envHelper'; // Ensure that the required environment variables are set
-
+dotenv.config();
+import { requireEnv } from '../utils/envHelper'; 
 
 test.describe('Logout Page Tests', () => {
   let loginUserName: string;
@@ -19,11 +18,9 @@ test.describe('Logout Page Tests', () => {
   });
 
   test('should log out successfully', async ({ page }) => {
-    // Assuming there's a logout button or link to click
     await page.getByText('manda user').click();
     await page.getByRole('menuitem', { name: 'Logout' }).click();
-    
-    // Check if the user is redirected to the login page
+  
     await expect(page).toHaveURL(/auth|login/i);
     await expect(page.locator('#app')).toContainText('Login');
   });
