@@ -1,67 +1,92 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>QA Portfolio - Your Name</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 0; }
-    header { background-color: #2c3e50; color: white; padding: 20px; text-align: center; }
-    section { padding: 20px; }
-    h2 { color: #2c3e50; }
-    .card { background: white; padding: 15px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-radius: 8px; }
-    footer { text-align: center; background: #2c3e50; color: white; padding: 10px; }
-    a { color: #2980b9; text-decoration: none; }
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chimezie Sunday · QA Portfolio</title>
+  <meta name="description" content="QA Engineer portfolio: automation, API, performance & accessibility case studies." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <header>
-    <h1>Your Name - QA Portfolio</h1>
-    <p>Quality Assurance Engineer | Tester | Automation Enthusiast</p>
+  <header class="container header">
+    <nav class="nav">
+      <a href="#about">About</a>
+      <a href="#skills">Skills</a>
+      <a href="#work">Case Studies</a>
+      <a href="#contact">Contact</a>
+    </nav>
   </header>
 
-  <section>
-    <h2>✍️ Test Cases</h2>
-    <div class="card">
-      <h3>Login Functionality</h3>
-      <p>Tested various scenarios like valid login, invalid credentials, blank fields, etc.</p>
-      <a href="#">View Sample Test Case (CSV)</a>
+  <section class="hero container" id="about">
+    <h1>Chimezie Sunday</h1>
+    <p class="subtitle">QA Engineer · Automation · API · Performance & Accessibility</p>
+    <p class="lead">
+      I test web & mobile apps end‑to‑end using Playwright/Cypress, Postman, Appium, and performance tools.
+      I care about reliability, speed, and accessibility—and I show results with clear metrics and dashboards.
+    </p>
+    <div class="cta">
+      <a class="btn" href="docs/Chimezie-Sunday-Resume.pdf" target="_blank">Download Résumé</a>
+      <a class="btn secondary" href="#work">See my work</a>
     </div>
-    <div class="card">
-      <h3>Search Feature Testing</h3>
-      <p>Covered edge cases, performance, and UI responses for search operations.</p>
-    </div>
-  </section>
-
-  <section>
-    <h2>❌ Bug Reports</h2>
-    <div class="card">
-      <h3>Bug: Search Results Not Updating</h3>
-      <p>Description: When entering new keywords, old results persist.</p>
-      <p>Status: Resolved | Severity: Medium</p>
-    </div>
-    <div class="card">
-      <h3>Bug: Broken Link on Signup Page</h3>
-      <p>Description: The link to Terms & Conditions redirects to 404.</p>
-      <p>Status: Open | Severity: Low</p>
+    <div class="links">
+      <a href="https://github.com/Jephthah-Sunday" target="_blank">GitHub</a> ·
+      <a href="https://www.linkedin.com/in/chimezie-sunday" target="_blank">LinkedIn</a> ·
+      <a href="mailto:thejephthahsunday@gmail.com">thejephthahsunday@gmail.com</a> ·
+      <span>Abuja, Nigeria</span>
     </div>
   </section>
 
-  <section>
-    <h2>🚀 Automation Projects</h2>
-    <div class="card">
-      <h3>Playwright - Login&Logout Automation</h3>
-      <p>Automated login scenarios using Cypress, assertions, and multiple test data.</p>
-      <a href="#">View GitHub Repository</a>
-    </div>
-    <div class="card">
-      <h3>Python Selenium - E2E Workflow</h3>
-      <p>End-to-end automation of e-commerce workflow (login, search, cart, checkout).</p>
+  <section class="container" id="skills">
+    <h2>Skills & Tools</h2>
+    <ul class="tags">
+      <li>Cypress</li><li>Playwright</li><li>Postman</li><li>Selenium</li><li>Appium</li>
+      <li>JMeter</li><li>k6</li><li>Datadog</li><li>GitHub Actions</li><li>Jenkins</li>
+      <li>Python</li><li>JavaScript</li><li>Gherkin</li>
+    </ul>
+    <p class="note">Strong in regression, smoke, integration, API, and mobile testing. Experienced with CI/CD gating and monitoring.</p>
+  </section>
+
+  <section class="container" id="work">
+    <h2>Featured Case Studies</h2>
+    <div class="grid">
+      <a class="card" href="case-studies/01-automation-framework.html">
+        <h3>1) Web E2E Automation (Cypress)</h3>
+        <p>Reduced manual regression effort by creating a robust POM‑based suite, running in CI with flaky‑test control.</p>
+        <span>Read →</span>
+      </a>
+      <a class="card" href="case-studies/02-performance-accessibility.html">
+        <h3>2) Performance & Accessibility Audits</h3>
+        <p>Lighthouse‑driven audits with before/after charts, image optimization, and Core Web Vitals improvements.</p>
+        <span>Read →</span>
+      </a>
+      <a class="card" href="case-studies/03-api-testing.html">
+        <h3>3) API Testing & Contract Checks</h3>
+        <p>Postman + schema validations, negative testing, and data‑driven suites with reporting.</p>
+        <span>Read →</span>
+      </a>
+      <a class="card" href="case-studies/04-mobile-testing.html">
+        <h3>4) Mobile QA (Appium)</h3>
+        <p>Functional & UX flows on Android/iOS with device farm runs and stability tracking.</p>
+        <span>Read →</span>
+      </a>
     </div>
   </section>
 
-  <footer>
-    <p>&copy; 2025 Your Name | QA Portfolio</p>
+  <section class="container" id="contact">
+    <h2>Contact</h2>
+    <p>Got a role or project where quality matters? I’d love to help.</p>
+    <ul class="contact-list">
+      <li>Email: <a href="mailto:thejephthahsunday@gmail.com">thejephthahsunday@gmail.com</a></li>
+      <li>LinkedIn: <a href="https://www.linkedin.com/in/chimezie-sunday" target="_blank">https://www.linkedin.com/in/chimezie-sunday</a></li>
+      <li>GitHub: <a href="https://github.com/Jephthah-Sunday" target="_blank">https://github.com/Jephthah-Sunday</a></li>
+    </ul>
+  </section>
+
+  <footer class="container footer">
+    <small>© Chimezie Sunday · Built as a lightweight static site (HTML + CSS). Host on GitHub Pages or Netlify in minutes.</small>
   </footer>
 </body>
 </html>
