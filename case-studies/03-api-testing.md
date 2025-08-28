@@ -1,42 +1,42 @@
 # API Testing & Contract Checks
 
 **Role:** QA Engineer  
-**Timeline:** {timeline}  
-**Stack:** {stack}  
-**Links:** [Repo](https://github.com/Jephthah-Sunday) · [Video Demo]({demo_link}) · [Issue Board]({board_link})
+**Timeline:** Feb–Mar 2025 (6 weeks)  
+**Stack:** Postman/Newman, JSON Schema, GitHub Actions, k6 (smoke perf), Swagger/OpenAPI  
+**Links:** [Repo](#) · [Video Demo](#) · [Issue Board](#)
 
 ## Context
-{context}
+Public REST APIs powering web + mobile. Incidents were traced to breaking changes in responses and missing validation for edge cases.
 
 ## Goals & Risks
-- {goal1}
-- {goal2}
-- {goal3}
-
-**Key risks:** {risks}
+- Guard against schema drift with contract tests on critical endpoints.
+- Increase negative coverage (auth, rate limits, pagination, malformed payloads).
+- Generate runnable docs from OpenAPI and CI results.
+**Key risks:** environment drift, flaky dependencies, test data collisions.
 
 ## Approach
-- Test design: {test_design}  
-- Tooling: {tooling}  
-- Data strategy: {data_strategy}  
-- CI/CD: {ci_cd}  
-- Flakiness control: {flakiness}
+- **Test design:** Positive/negative suites per endpoint; data‑driven with examples; auth flows (expired/invalid tokens).
+- **Tooling:** Postman collections + JSON schema asserts; Newman in CI with JUnit XML; k6 mini smoke for p95 latency.
+- **Data strategy:** seeded fixtures; idempotent create/delete; unique IDs.
+- **CI/CD:** GitHub Actions on PR + nightly; threshold gates on status codes and schema failures; reports uploaded.
+- **Flakiness control:** mock/stub for third‑party when possible; resilient retries for idempotent GETs only.
 
 ## Evidence
-- Test plan: {test_plan_link}
-- Test cases: {test_cases_link}
-- Reports/Dashboards: {reports_link}
-- Bugs found: {bugs_link}
+- Postman collection + environment: LINK
+- CI run with JUnit report: LINK
+- k6 summary + thresholds: LINK
+- Bug tickets: LINK
 
 ## Results (Before → After)
-- {metric1}: **{before1} → {after1}**
-- {metric2}: **{before2} → {after2}**
-- {metric3}: **{before3} → {after3}**
+- Contract test failures caught pre‑merge: **0 → 6** (first month)  
+- p95 latency under smoke: **620ms → 410ms**
+- 4xx/5xx error rate during release week: **2.1% → 0.6%**
 
-> Summary: {outcome_summary}
+> Summary: Prevented breaking API changes from reaching production and improved reliability during releases.
 
 ## What I’d Improve Next
-{next_improvements}
+- Add consumer‑driven contract tests for key clients.
+- Broaden pagination + sorting edge cases across large datasets.
 
 ---
 *Prepared by Chimezie Sunday · [https://www.linkedin.com/in/chimezie-sunday](https://www.linkedin.com/in/chimezie-sunday) · [thejephthahsunday@gmail.com](mailto:thejephthahsunday@gmail.com)*

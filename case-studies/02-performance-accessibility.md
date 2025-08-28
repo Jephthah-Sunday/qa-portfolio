@@ -1,42 +1,39 @@
 # Performance & Accessibility Audits
 
 **Role:** QA Engineer  
-**Timeline:** {timeline}  
-**Stack:** {stack}  
-**Links:** [Repo](https://github.com/Jephthah-Sunday) · [Video Demo]({demo_link}) · [Issue Board]({board_link})
+**Timeline:** Jan–Feb 2025 (4 weeks)  
+**Stack:** Lighthouse CI, WebPageTest (lab), Chrome DevTools, axe-core, GitHub Actions  
+**Links:** [Before/After Reports](#) · [Dashboard](#)
 
 ## Context
-{context}
+Marketing + app shell had poor Core Web Vitals on mobile. Accessibility issues (contrast, landmarks) affected screen-reader users.
 
 ## Goals & Risks
-- {goal1}
-- {goal2}
-- {goal3}
-
-**Key risks:** {risks}
+- Improve mobile Lighthouse Performance to ≥80 and Accessibility to ≥90.
+- Reduce Largest Contentful Paint (LCP) and First Input Delay (FID/INP surrogate).
+- Establish a CI budget with fail‑the‑build thresholds.
+**Key risks:** render‑blocking fonts, unoptimized images, heavy third‑party scripts.
 
 ## Approach
-- Test design: {test_design}  
-- Tooling: {tooling}  
-- Data strategy: {data_strategy}  
-- CI/CD: {ci_cd}  
-- Flakiness control: {flakiness}
+- **Performance:** image WebP + responsive sizes; preload hero fonts; code‑split below‑the‑fold modules; defer analytics; lazy‑load media.
+- **Accessibility:** semantic headings; ARIA labels; color contrast fixes; focus states; keyboard traps removed; axe CI checks.
+- **CI:** Lighthouse CI in Actions with budgets; artifacts stored; trend chart in dashboard repo.
 
 ## Evidence
-- Test plan: {test_plan_link}
-- Test cases: {test_cases_link}
-- Reports/Dashboards: {reports_link}
-- Bugs found: {bugs_link}
+- Baseline & post‑fix Lighthouse reports: LINK
+- axe reports & issue list: LINK
+- PRs with diffs for image/Font changes: LINK
 
 ## Results (Before → After)
-- {metric1}: **{before1} → {after1}**
-- {metric2}: **{before2} → {after2}**
-- {metric3}: **{before3} → {after3}**
+- Lighthouse Perf (mobile): **44 → 88**
+- LCP (p75, lab): **4.8s → 2.6s**
+- Accessibility (axe issues): **31 → 7**
 
-> Summary: {outcome_summary}
+> Summary: Faster page loads and improved accessibility; regressions now blocked by budgets in CI.
 
 ## What I’d Improve Next
-{next_improvements}
+- Implement server‑side caching for API responses.
+- Add RUM to track CWV in the field.
 
 ---
 *Prepared by Chimezie Sunday · [https://www.linkedin.com/in/chimezie-sunday](https://www.linkedin.com/in/chimezie-sunday) · [thejephthahsunday@gmail.com](mailto:thejephthahsunday@gmail.com)*
