@@ -1,11 +1,201 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Web E2E Automation (Cypress) · Case Study</title><link rel="stylesheet" href="../styles.css"></head>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Web E2E Automation (Cypress & Playwright) · Case Study</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
 <body>
   <div class="container">
     <p><a href="../index.html">← Back</a></p>
-    <h1>Web E2E Automation (Cypress)</h1>
-    <p class="note">Demonstrate your test architecture, CI integration, flakiness control, and measurable impact on release speed.</p>
-    <p>Open the Markdown template for this case study: <a href="../case-studies/01-automation-framework.md" target="_blank">../case-studies/01-automation-framework.md</a></p>
+
+    <h1>Web E2E Automation (Cypress & Playwright)</h1>
+    <p class="note">
+      Dual-framework E2E suite built for speed and reliability: shared test design, parity across Cypress and Playwright,
+      and CI gates that block regressions before merge.
+    </p>
+
+    <section>
+      <h2>At-a-glance results</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Regression runtime</h3>
+          <p><strong>150m → 28m</strong> (−81%) via tagging + parallel workers.</p>
+        </div>
+        <div class="card">
+          <h3>Flake rate</h3>
+          <p><strong>9.4% → 1.6%</strong> (last 200 runs) using stable selectors + quarantine.</p>
+        </div>
+        <div class="card">
+          <h3>P0 escapes</h3>
+          <p><strong>3 → 0</strong> over 2 releases with PR smoke gates.</p>
+        </div>
+      </div>
+      <!-- Replace the example numbers above with your real metrics or remove this block. -->
+    </section>
+
+    <section>
+      <h2>Context</h2>
+      <ul>
+        <li>SaaS web application with weekly releases; critical flows: auth, catalog, cart/checkout.</li>
+        <li>Requirement: a dependable, <em>fast</em> smoke gate on PR + deeper nightly regression runs.</li>
+        <li>Approach: maintain **parity** between Cypress and Playwright so teams can compare DX/traceability, and avoid single-tool lock-in.</li>
+      </ul>
+      <p class="note">
+        Repo root: <a href="https://github.com/Jephthah-Sunday/Automation-Scripts" target="_blank">Automation-Scripts</a>
+      </p>
+    </section>
+
+    <section>
+      <h2>Goals & Risks</h2>
+      <ul>
+        <li><strong>Cut regression time</strong> to &lt;30 minutes with selective tags + parallelization.</li>
+        <li><strong>Stabilize smoke</strong> to ≤2% flake and enforce it as a required PR check.</li>
+        <li><strong>Improve observability</strong> with videos, screenshots, and HTML/trace reports in CI.</li>
+      </ul>
+      <p class="note"><strong>Key risks:</strong> brittle selectors, async race conditions, unstable test data, third-party variability.</p>
+    </section>
+
+    <section>
+      <h2>Architecture & Test Design</h2>
+      <h3>Shared strategy</h3>
+      <ul>
+        <li><strong>POM</strong> for Login, Inventory, Cart/Checkout, Profile; shared helpers + custom commands/utilities.</li>
+        <li><strong>Tagging</strong>: <code>@smoke</code>, <code>@regression</code>, <code>@auth</code>, <code>@checkout</code> for selective runs.</li>
+        <li><strong>Data strategy</strong>: seeded users, idempotent teardown, unique fixtures per run.</li>
+        <li><strong>Network control</strong>: stub external providers in PR runs; exercise live endpoints in nightly.</li>
+      </ul>
+
+      <h3>Cypress package</h3>
+<pre><code># packages/e2e-cypress (excerpt)
+e2e/
+  auth/login.spec.ts
+  checkout/checkout.spec.ts
+fixtures/users.json
+support/
+  commands.ts
+  pageobjects/
+    LoginPage.ts
+    InventoryPage.ts
+    CheckoutPage.ts
+reports/ (Mochawesome/Allure)
+</code></pre>
+      <p class="note">
+        Browse: <a href="https://github.com/Jephthah-Sunday/Automation-Scripts/tree/Master/packages/e2e-cypress" target="_blank">/packages/e2e-cypress</a>
+      </p>
+
+      <h3>Playwright package</h3>
+<pre><code># packages/e2e-playwright (excerpt)
+tests/
+  auth.spec.ts
+  checkout.spec.ts
+page-objects/
+  LoginPage.ts
+  InventoryPage.ts
+  CheckoutPage.ts
+playwright-report/ (HTML report + traces)
+</code></pre>
+      <p class="note">
+        Browse: <a href="https://github.com/Jephthah-Sunday/Automation-Scripts/tree/Master/packages/e2e-playwright" target="_blank">/packages/e2e-playwright</a>
+      </p>
+    </section>
+
+    <section>
+      <h2>CI/CD Integration</h2>
+      <ul>
+        <li><strong>GitHub Actions</strong> matrix across {framework: cypress, playwright} × {browser: Chrome, Firefox}.</li>
+        <li><strong>Artifacts</strong>: Cypress videos/screens + Mochawesome/Allure; Playwright HTML + traces.</li>
+        <li><strong>Budgets</strong>: fail PR if smoke duration or flake threshold is exceeded.</li>
+      </ul>
+
+      <details>
+        <summary>CI workflow (drop in <code>.github/workflows/ci.yml</code>, adjust scripts if needed)</summary>
+<pre><code>name: CI
+on:
+  push: { branches: [Master] }
+  pull_request:
+permissions: { contents: read }
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        framework: [cypress, playwright]
+        browser: [chrome, firefox]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 18 }
+      - name: Install deps
+        run: npm ci
+      - name: Run ${{ matrix.framework }} on ${{ matrix.browser }}
+        env:
+          BROWSER: ${{ matrix.browser }}
+        run: |
+          if [ "${{ matrix.framework }}" = "cypress" ]; then
+            npm run test:cypress
+          else
+            npm run test:playwright
+          fi
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.framework }}-${{ matrix.browser }}-reports
+          path: |
+            packages/e2e-cypress/mochawesome-report/**
+            packages/e2e-cypress/allure-results/**
+            packages/e2e-playwright/playwright-report/**
+</code></pre>
+      </details>
+
+      <p class="note">
+        Actions: <a href="https://github.com/Jephthah-Sunday/Automation-Scripts/actions" target="_blank">view runs</a>
+      </p>
+    </section>
+
+    <section>
+      <h2>Flakiness Control</h2>
+      <ul>
+        <li>Stable <strong>data-test</strong> selectors & deterministic waits (no fixed sleeps).</li>
+        <li>Retries only on idempotent steps; <strong>quarantine</strong> tag/list for known external instability.</li>
+        <li>Periodic selector audits and CI trend monitoring to keep the suite healthy.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Evidence</h2>
+      <ul>
+        <li>Repository: <a href="https://github.com/Jephthah-Sunday/Automation-Scripts" target="_blank">Automation-Scripts</a></li>
+        <li>Cypress package: <a href="https://github.com/Jephthah-Sunday/Automation-Scripts/tree/Master/packages/e2e-cypress" target="_blank">/packages/e2e-cypress</a></li>
+        <li>Playwright package: <a href="https://github.com/Jephthah-Sunday/Automation-Scripts/tree/Master/packages/e2e-playwright" target="_blank">/packages/e2e-playwright</a></li>
+        <li>CI workflows: <a href="https://github.com/Jephthah-Sunday/Automation-Scripts/tree/Master/.github/workflows" target="_blank">.github/workflows</a></li>
+        <li>Actions runs (reports as artifacts): <a href="https://github.com/Jephthah-Sunday/Automation-Scripts/actions" target="_blank">/actions</a></li>
+      </ul>
+      <p class="note">Adjust script names/paths to match your package.json. Swap these links for specific runs or report permalinks once available.</p>
+    </section>
+
+    <section>
+      <h2>Results (Before → After)</h2>
+      <ul>
+        <li>Regression runtime: <strong>150m → 28m</strong> (−81%)</li>
+        <li>Flake rate (last 200 runs): <strong>9.4% → 1.6%</strong></li>
+        <li>P0 escapes (last 2 releases): <strong>3 → 0</strong></li>
+      </ul>
+      <p class="note"><em>Swap in your real metrics + timeframe.</em></p>
+    </section>
+
+    <section>
+      <h2>What I’d Improve Next</h2>
+      <ul>
+        <li>Add <strong>visual diff testing</strong> for pricing/checkout to catch UI shifts.</li>
+        <li>Introduce <strong>contract tests</strong> for webhooks to detect schema drift.</li>
+        <li>Extend coverage to WebKit and add per-PR Lighthouse/axe budgets for perf/a11y.</li>
+      </ul>
+    </section>
+
+    <hr />
+    <p>Markdown template (quick editing): <a href="../case-studies/01-automation-framework.md" target="_blank">../case-studies/01-automation-framework.md</a></p>
   </div>
-</body></html>
+</body>
+</html>
