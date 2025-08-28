@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <base href="/qa-portfolio/">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Performance & Accessibility Testing · Case Study</title>
@@ -16,7 +17,7 @@
     </p>
 
     <section>
-      <h2>At-a-glance results</h2>
+      <h2>At A Glance Results</h2>
       <div class="grid">
         <div class="card">
           <h3>Lighthouse (mobile)</h3>
@@ -36,8 +37,8 @@
     <section>
       <h2>Evidence & test-case docs</h2>
       <ul>
-        <li>Performance test cases (design & acceptance criteria): <a href="docs/Performance Test Case Suite for Patient Data Platform  - Performance.pdf" target="_blank">LINK_TO_PERFORMANCE_TEST_CASE_DOC</a></li>
-        <li>k6 scripts & summaries: <a href="https://github.com/Jephthah-Sunday/Automation-Scripts/tree/Master/K6_Performance" target="_blank">LINK_TO_K6_SCRIPTS_REPO</a></li>
+        <li>Performance test cases (design & acceptance criteria): <a href="docs/perf-test-cases.pdf" target="_blank">Performance Test Cases (PDF)</a></li>
+        <li>k6 scripts & summaries: <a href="https://github.com/Jephthah-Sunday/Automation-Scripts/tree/Master/K6_Performance" target="_blank">K6 SCRIPTS REPO</a></li>
       </ul>
     </section>
 
@@ -51,7 +52,7 @@
     </section>
 
     <section>
-      <h2>Process — Performance testing</h2>
+      <h2>Performance testing process</h2>
       <h3>Lighthouse CI (lab budgets)</h3>
       <ul>
         <li>Track CWV deltas per PR and nightly; fail build on budget breaches (LCP/CLS/INP proxies, perf score).</li>
@@ -117,7 +118,7 @@ export default function () {
     </section>
 
     <section>
-      <h2>Process — Accessibility testing</h2>
+      <h2>Accessibility testing process</h2>
       <p>I combine automated rules with manual UX checks. The checklist below (used across all projects) maps to WCAG 2.1 AA.</p>
 
       <h3>Automated checks (CI)</h3>
