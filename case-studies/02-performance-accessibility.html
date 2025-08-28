@@ -1,11 +1,164 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Performance & Accessibility Audits · Case Study</title><link rel="stylesheet" href="../styles.css"></head>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Performance & Accessibility Testing · Case Study</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
 <body>
   <div class="container">
     <p><a href="../index.html">← Back</a></p>
-    <h1>Performance & Accessibility Audits</h1>
-    <p class="note">Show before/after Lighthouse scores, Core Web Vitals, and specific fixes that improved UX.</p>
-    <p>Open the Markdown template for this case study: <a href="../case-studies/02-performance-accessibility.md" target="_blank">../case-studies/02-performance-accessibility.md</a></p>
-  </div>
-</body></html>
+
+    <h1>Performance & Accessibility Testing</h1>
+    <p class="note">
+      End-to-end performance and a11y testing integrated into CI. This work spans anonymized enterprise web apps. Product names are omitted for NDA compliance.
+    </p>
+
+    <section>
+      <h2>At-a-glance results</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Lighthouse (mobile)</h3>
+          <p><strong>44 → 88</strong> after image/font optimization and script deferral.</p>
+        </div>
+        <div class="card">
+          <h3>LCP (lab, p75)</h3>
+          <p><strong>4.8s → 2.6s</strong> via WebP, preloads, and code-splitting.</p>
+        </div>
+        <div class="card">
+          <h3>Accessibility</h3>
+          <p><strong>31 → 7</strong> axe violations; keyboard traps removed; focus order fixed.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Evidence & test-case docs</h2>
+      <ul>
+        <li>Performance test cases (design & acceptance criteria): <a href="docs/Performance Test Case Suite for Patient Data Platform  - Performance.pdf" target="_blank">LINK_TO_PERFORMANCE_TEST_CASE_DOC</a></li>
+        <li>k6 scripts & summaries: <a href="https://github.com/Jephthah-Sunday/Automation-Scripts/tree/Master/K6_Performance" target="_blank">LINK_TO_K6_SCRIPTS_REPO</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Context</h2>
+      <ul>
+        <li>Mobile-first user journeys with heavy authenticated flows and some third-party SDKs.</li>
+        <li>Goal: measurable Core Web Vitals improvements and an a11y baseline that blocks regressions in CI.</li>
+        <li>Constraint: anonymized, multi-environment setup with strict data-protection requirements.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Process — Performance testing</h2>
+      <h3>Lighthouse CI (lab budgets)</h3>
+      <ul>
+        <li>Track CWV deltas per PR and nightly; fail build on budget breaches (LCP/CLS/INP proxies, perf score).</li>
+        <li>Artifacts: JSON + HTML reports uploaded to CI; trend chart maintained in a shared dashboard.</li>
+      </ul>
+
+      <h3>k6 (API & page-level scenarios)</h3>
+      <ol>
+        <li><strong>Scope & endpoints:</strong> auth, search/listing, details, and save/submit operations mapped from
+            the test plan (see “Performance test cases”).</li>
+        <li><strong>Scenarios & stages:</strong> smoke (sanity), baseline (steady), ramp (load), and brief spike
+            (resilience) with realistic RPS per endpoint.</li>
+        <li><strong>Thresholds:</strong> p(95) latency, error-rate, and checks% (e.g., <code>p(95)&lt;500ms</code>,
+            errors &lt; 1%, checks &gt;= 99%). Threshold failures = CI fail.</li>
+        <li><strong>Data & auth:</strong> token bootstrap per VU, seeded users, idempotent writes, and isolated
+            test tenants.</li>
+        <li><strong>Outputs:</strong> CI console summary + JSON summary; optional InfluxDB/Grafana for trend charts.</li>
+        <li><strong>Gating:</strong> PRs run smoke/baseline; nightly runs include ramp/spike and publish trend.</li>
+      </ol>
+
+      <details>
+        <summary>k6 scenario sketch (illustrative)</summary>
+<pre><code>import http from 'k6/http';
+import { check, sleep } from 'k6';
+
+export const options = {
+  thresholds: {
+    http_req_failed: ['rate&lt;0.01'],
+    http_req_duration: ['p(95)&lt;500'],
+    checks: ['rate&gt;=0.99'],
+  },
+  scenarios: {
+    baseline: {
+      executor: 'constant-arrival-rate',
+      rate: 20, // requests/second target
+      timeUnit: '1s',
+      duration: '5m',
+      preAllocatedVUs: 20,
+      maxVUs: 50,
+    },
+    ramp: {
+      executor: 'ramping-arrival-rate',
+      startRate: 10,
+      timeUnit: '1s',
+      stages: [
+        { target: 50, duration: '5m' },
+        { target: 80, duration: '5m' },
+        { target: 0,  duration: '2m' },
+      ],
+      preAllocatedVUs: 20,
+      maxVUs: 120,
+    },
+  },
+};
+
+export default function () {
+  const res = http.get(__ENV.BASE_URL + '/api/v1/search?q=abc', { headers: { Authorization: `Bearer ${__ENV.TOKEN}` }});
+  check(res, { 'status 200': r =&gt; r.status === 200 });
+  sleep(1);
+}
+</code></pre>
+      </details>
+    </section>
+
+    <section>
+      <h2>Process — Accessibility testing</h2>
+      <p>I combine automated rules with manual UX checks. The checklist below (used across all projects) maps to WCAG 2.1 AA.</p>
+
+      <h3>Automated checks (CI)</h3>
+      <ul>
+        <li>axe-core scan on key templates (public pages + authenticated flows).</li>
+        <li>HTML validity & landmark roles (header/main/nav/footer) verified.</li>
+        <li>Color contrast thresholds (text & UI components) evaluated.</li>
+      </ul>
+
+      <h3>Manual checks (keyboard & screen reader)</h3>
+      <ul>
+        <li>Keyboard-only: focus visible, logical order, trap-free modals, escape/close behavior.</li>
+        <li>Forms: label associations, error summary/aria-live announcements, descriptive buttons.</li>
+        <li>Screen reader smoke (NVDA/VoiceOver): headings hierarchy, control names, alt text, status updates.</li>
+      </ul>
+
+      <details>
+        <summary>Accessibility checklist (anonymized sample)</summary>
+        <ul>
+          <li><input type="checkbox" disabled> Page has a single <code>&lt;h1&gt;</code>; headings follow a logical order.</li>
+          <li><input type="checkbox" disabled> All actionable elements have accessible names (buttons/links/icons).</li>
+          <li><input type="checkbox" disabled> Form fields have labels; error messages are programmatically associated.</li>
+          <li><input type="checkbox" disabled> Keyboard can open/close modals and move focus back to the trigger.</li>
+          <li><input type="checkbox" disabled> Focus state is visible and not obscured across themes.</li>
+          <li><input type="checkbox" disabled> Images have meaningful <code>alt</code> or <code>alt=""</code> when decorative.</li>
+          <li><input type="checkbox" disabled> Color contrast ≥ 4.5:1 (text) and ≥ 3:1 (UI components) where applicable.</li>
+          <li><input type="checkbox" disabled> Live regions/alerts announce async updates (e.g., form success).</li>
+          <li><input type="checkbox" disabled> Skip-to-content link present and functional.</li>
+        </ul>
+      </details>
+    </section>
+
+    <section>
+      <h2>CI/CD integration</h2>
+      <ul>
+        <li><strong>Lighthouse CI</strong> on PR + nightly with budgets; artifacts stored.</li>
+        <li><strong>axe</strong> automated checks on PR; manual checks documented per release.</li>
+        <li><strong>k6</strong> smoke on PR; baseline + ramp/spike nightly; thresholds gate merges.</li>
+      </ul>
+    </section>
+
+
+</body>
+</html>

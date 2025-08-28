@@ -12,12 +12,11 @@
 
     <h1>Web E2E Automation (Cypress & Playwright)</h1>
     <p class="note">
-      Dual-framework E2E suite built for speed and reliability: shared test design, parity across Cypress and Playwright,
-      and CI gates that block regressions before merge.
+      Reduced manual regression effort by creating a robust POM‑based suite, running in CI with flaky‑test control.
     </p>
 
     <section>
-      <h2>At-a-glance results</h2>
+      <h2>At A Glance Results</h2>
       <div class="grid">
         <div class="card">
           <h3>Regression runtime</h3>
@@ -32,7 +31,7 @@
           <p><strong>3 → 0</strong> over 2 releases with PR smoke gates.</p>
         </div>
       </div>
-      <!-- Replace the example numbers above with your real metrics or remove this block. -->
+
     </section>
 
     <section>
@@ -110,7 +109,7 @@ playwright-report/ (HTML report + traces)
       </ul>
 
       <details>
-        <summary>CI workflow (drop in <code>.github/workflows/ci.yml</code>, adjust scripts if needed)</summary>
+        <summary>CI workflow in github/workflows/ci.yml</summary>
 <pre><code>name: CI
 on:
   push: { branches: [Master] }
@@ -148,10 +147,6 @@ jobs:
             packages/e2e-playwright/playwright-report/**
 </code></pre>
       </details>
-
-      <p class="note">
-        Actions: <a href="https://github.com/Jephthah-Sunday/Automation-Scripts/actions" target="_blank">view runs</a>
-      </p>
     </section>
 
     <section>
@@ -170,10 +165,8 @@ jobs:
         <li>Cypress package: <a href="https://github.com/Jephthah-Sunday/Automation-Scripts/tree/Master/packages/e2e-cypress" target="_blank">/packages/e2e-cypress</a></li>
         <li>Playwright package: <a href="https://github.com/Jephthah-Sunday/Automation-Scripts/tree/Master/packages/e2e-playwright" target="_blank">/packages/e2e-playwright</a></li>
         <li>CI workflows: <a href="https://github.com/Jephthah-Sunday/Automation-Scripts/tree/Master/.github/workflows" target="_blank">.github/workflows</a></li>
-        <li>Actions runs (reports as artifacts): <a href="https://github.com/Jephthah-Sunday/Automation-Scripts/actions" target="_blank">/actions</a></li>
       </ul>
-      <p class="note">Adjust script names/paths to match your package.json. Swap these links for specific runs or report permalinks once available.</p>
-    </section>
+     </section>
 
     <section>
       <h2>Results (Before → After)</h2>
@@ -181,16 +174,6 @@ jobs:
         <li>Regression runtime: <strong>150m → 28m</strong> (−81%)</li>
         <li>Flake rate (last 200 runs): <strong>9.4% → 1.6%</strong></li>
         <li>P0 escapes (last 2 releases): <strong>3 → 0</strong></li>
-      </ul>
-      <p class="note"><em>Swap in your real metrics + timeframe.</em></p>
-    </section>
-
-    <section>
-      <h2>What I’d Improve Next</h2>
-      <ul>
-        <li>Add <strong>visual diff testing</strong> for pricing/checkout to catch UI shifts.</li>
-        <li>Introduce <strong>contract tests</strong> for webhooks to detect schema drift.</li>
-        <li>Extend coverage to WebKit and add per-PR Lighthouse/axe budgets for perf/a11y.</li>
       </ul>
     </section>
 
