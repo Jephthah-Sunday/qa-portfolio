@@ -1,11 +1,166 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>API Testing · Case Study</title><link rel="stylesheet" href="../styles.css"></head>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>API Testing · Case Study</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
 <body>
   <div class="container">
     <p><a href="../index.html">← Back</a></p>
-    <h1>API Testing & Contract Checks</h1>
-    <p class="note">Highlight schema validations, negative scenarios, and how you caught regressions pre‑release.</p>
-    <p>Open the Markdown template for this case study: <a href="../case-studies/03-api-testing.md" target="_blank">../case-studies/03-api-testing.md</a></p>
+
+    <h1>API Testing</h1>
+    <p class="note">
+      Functional testing for REST APIs across anonymized enterprise web apps. Product names omitted for NDA compliance.
+    </p>
+
+    <section>
+      <h2>At-a-glance results</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Schema/Contract Catches</h3>
+          <p><strong>0 → 6</strong> breaking changes caught pre-merge (first month) via contract tests.</p>
+        </div>
+        <div class="card">
+          <h3>Error Rate (release week)</h3>
+          <p><strong>2.1% → 0.6%</strong> (4xx/5xx) after negative coverage & validation on PR.</p>
+        </div>
+        <div class="card">
+          <h3>p95 Latency (smoke)</h3>
+          <p><strong>~620ms → ~410ms</strong> on critical read endpoints (with thresholds in CI).</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Scope & Context</h2>
+      <ul>
+        <li>Public + authenticated REST endpoints: auth, search/list, details, create/update, and export.</li>
+        <li>Primary risks: silent contract drift, pagination bugs, insufficient negative coverage, and auth/session edge cases.</li>
+        <li>Targets: stable PR gates, clear failure signals, and traceable evidence (reports, logs) for fast fixes.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Test Design</h2>
+      <ul>
+        <li><strong>Collections & Folders:</strong> one folder per resource (<code>/auth</code>, <code>/users</code>, <code>/records</code>, <code>/search</code>, <code>/export</code>).</li>
+        <li><strong>Positive paths:</strong> happy-path CRUD, pagination/sorting, filters, and role-based access.</li>
+        <li><strong>Negative/abuse:</strong> invalid/expired tokens, malformed JSON, boundary values, rate-limit and idempotency checks, missing fields.</li>
+        <li><strong>Contract tests:</strong> JSON Schema for requests/responses + selective consumer-driven checks for critical fields.</li>
+        <li><strong>Data strategy:</strong> seeded tenants/users, isolated IDs per run, teardown or idempotent writes to avoid collisions.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Tooling & Conventions</h2>
+      <ul>
+        <li><strong>Postman</strong> collections/environments, <strong>Newman</strong> in CI for batch runs with JUnit/HTML reports.</li>
+        <li><strong>Schemas:</strong> versioned in repo under <code>schemas/</code>; validated in Postman tests.</li>
+        <li><strong>Variables:</strong> <code>BASE_URL</code>, <code>TOKEN</code>, <code>TENANT_ID</code>, request-scoped UUIDs for uniqueness.</li>
+        <li><strong>Secrets:</strong> tokens pulled in CI from encrypted secrets (never committed).</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Examples</h2>
+
+      <h3>Pre-request: fetch token</h3>
+<pre><code>// Pre-request script (Postman)
+pm.sendRequest({
+  url: pm.environment.get("AUTH_URL"),
+  method: "POST",
+  header: { "Content-Type": "application/json" },
+  body: { mode: "raw", raw: JSON.stringify({
+    client_id: pm.environment.get("CLIENT_ID"),
+    client_secret: pm.environment.get("CLIENT_SECRET"),
+    grant_type: "client_credentials"
+  }) }
+}, (err, res) => {
+  pm.expect(err).to.equal(null);
+  const token = res.json().access_token;
+  pm.environment.set("TOKEN", token);
+});
+</code></pre>
+
+      <h3>Contract test (response schema)</h3>
+<pre><code>// Tests tab (Postman)
+const schema = {
+  type: "object",
+  required: ["id", "name", "createdAt"],
+  properties: {
+    id: { type: "string" },
+    name: { type: "string", minLength: 1 },
+    createdAt: { type: "string", format: "date-time" },
+    meta: { type: "object" }
+  },
+  additionalProperties: true
+};
+pm.test("schema is valid", function () {
+  pm.response.to.have.jsonSchema(schema); // uses Postman's built-in JSON schema validator
+});
+pm.test("status is 200", () => pm.response.to.have.status(200));
+</code></pre>
+
+      <h3>Negative case: malformed payload + auth</h3>
+<pre><code>// Tests tab (Postman)
+pm.test("rejects malformed JSON", function () {
+  pm.response.to.have.status(400);
+  const body = pm.response.json();
+  pm.expect(body.error || body.message).to.exist;
+});
+pm.test("requires auth", function () {
+  // In a separate request without Authorization header
+  pm.response.to.have.status(401);
+});
+</code></pre>
+    </section>
+
+    <section>
+      <h2>CI/CD Integration</h2>
+      <ul>
+        <li><strong>PR gate (Newman):</strong> run smoke + contract folders; fail the check on any test error or schema violation.</li>
+        <li><strong>Nightly:</strong> full suite including negative, pagination, and edge-case flows; upload JUnit/HTML reports as artifacts.</li>
+        <li><strong>Thresholds (optional):</strong> assert p95 duration on selected endpoints via a short k6 smoke (separate job) to catch perf regressions.</li>
+      </ul>
+
+      <details>
+        <summary>Newman in GitHub Actions (example)</summary>
+<pre><code>name: api-tests
+on:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  newman:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 18 }
+      - run: npm i -g newman newman-reporter-htmlextra
+      - name: Run smoke + contract
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+          AUTH_URL: ${{ secrets.AUTH_URL }}
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+        run: |
+          newman run postman/collections/api.postman_collection.json \
+            -e postman/environments/ci.postman_environment.json \
+            --folder "smoke" --folder "contract" \
+            --reporters cli,htmlextra,junit \
+            --reporter-htmlextra-export newman/report.html \
+            --reporter-junit-export newman/junit.xml
+      - uses: actions/upload-artifact@v4
+        with:
+          name: newman-reports
+          path: newman/**
+</code></pre>
+      </details>
+    </section>
+
+    <hr />
   </div>
-</body></html>
+</body>
+</html>

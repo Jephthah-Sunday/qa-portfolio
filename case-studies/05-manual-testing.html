@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Manual Testing · Case Study</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <p><a href="../index.html">← Back</a></p>
+
+    <h1>Manual Testing</h1>
+    <p class="note">
+      End-to-end manual testing for anonymized enterprise web apps:
+      Product names are omitted for NDA compliance; linked artifacts are redacted samples.
+    </p>
+
+    <section>
+      <h2>At-a-glance results</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Coverage</h3>
+          <p><strong>~180 test cases</strong> across smoke, regression, and UAT flows.</p>
+        </div>
+        <div class="card">
+          <h3>Defects caught pre-release</h3>
+          <p><strong>28</strong> (7 P1, 0 P0) before production cut.</p>
+        </div>
+        <div class="card">
+          <h3>Cycle time</h3>
+          <p>Regression cycle reduced from <strong>3d → 1.5d</strong> with better modularization.</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Scope & Context</h2>
+      <ul>
+        <li><strong>Contract platform:</strong> user roles, clause library, workflow approvals, billing, and export.</li>
+        <li><strong>Data portal:</strong> secure auth, registry forms, document upload/preview, reports, and consent.</li>
+        <li>Objectives: solid smoke for PR reviews, deep regression per release, and UAT sign-off with traceability.</li>
+        <li>Constraints: multi-env setup, PII rules, and strict audit trails (timestamps, actor, reason).</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Test Strategy (manual-first)</h2>
+      <ul>
+        <li><strong>Requirement walkthrough</strong> → identify user stories, risks, and data permutations.</li>
+        <li><strong>Test design</strong> → modular test cases mapped to stories (traceability matrix).</li>
+        <li><strong>Execution cycles</strong> → smoke (daily), regression (pre-release), UAT (stakeholder scripts).</li>
+        <li><strong>Bug triage</strong> → severity/priority, repro evidence (screens, HAR, logs), fix/verify loop.</li>
+        <li><strong>Exit criteria</strong> → all P0 closed, P1 mitigated, smoke 100% pass, high-risk areas retested.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Test Types Covered (manual)</h2>
+      <table style="width:100%;border-collapse:collapse">
+        <tbody>
+          <tr>
+            <td><strong>Smoke / Sanity</strong></td>
+            <td>Auth, nav, create/read core entities, critical happy paths.</td>
+          </tr>
+          <tr>
+            <td><strong>Functional (positive/negative)</strong></td>
+            <td>Form validations, boundary values, RBAC, idempotency, error messaging.</td>
+          </tr>
+          <tr>
+            <td><strong>Integration / Workflow</strong></td>
+            <td>Multi-step approvals, webhooks/jobs confirmation (UI evidence), email templates.</td>
+          </tr>
+          <tr>
+            <td><strong>Usability</strong></td>
+            <td>Clarity of labels, empty states, destructive action safeguards, undo/rollback paths.</td>
+          </tr>
+          <tr>
+            <td><strong>Accessibility (manual checks)</strong></td>
+            <td>Keyboard order/focus, visible focus states, headings hierarchy, alt text, ARIA labels.</td>
+          </tr>
+          <tr>
+            <td><strong>Compatibility</strong></td>
+            <td>Chrome/Firefox/Edge (desktop); responsive checks for key views (tablet, mobile).</td>
+          </tr>
+          <tr>
+            <td><strong>Data & Security basics</strong></td>
+            <td>Role isolation, no sensitive data in URLs/logs, session timeout/reauth flows.</td>
+          </tr>
+          <tr>
+            <td><strong>Localization / Formatting</strong></td>
+            <td>Dates, numbers, currency; timezones/DST where applicable.</td>
+          </tr>
+          <tr>
+            <td><strong>Regression</strong></td>
+            <td>All high-risk modules + recent bug buckets retested before release.</td>
+          </tr>
+          <tr>
+            <td><strong>UAT</strong></td>
+            <td>Stakeholder scripts: business scenarios, acceptance notes, sign-off record.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Example Manual Test Case (snippet)</h2>
+<pre><code>ID: REG-ACL-014
+Title: Approver can approve a submitted contract
+Preconditions: User A (Author), User B (Approver); draft contract exists
+Steps:
+  1) Author submits contract for approval
+  2) Approver receives notification and opens contract
+  3) Approver reviews, adds comment, clicks "Approve"
+Expected:
+  - Status changes to "Approved"; audit log shows actor, timestamp, comment
+  - Author receives confirmation; export is enabled
+Notes:
+  - Negative: Approver without permission sees disabled action with tooltip
+  - Evidence: screenshots + audit log entry ID
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Evidence & Links (sample files)</h2>
+      <p class="note">Docs are anonymized; filenames reflect the domain (contract platform / data portal). Store them in <code>../docs/</code> and update the links.</p>
+      <ul>
+        <!-- Contract platform samples -->
+        <li>Test Plan — Contract Platform (PDF): <a href="../docs/Product-QA-Test-Plan.pdf" target="_blank">../docs/manual-test-plan.pdf</a></li>
+        <li>Test Cases — Contract Platform (PDF): <a href="../docs/Product-Test-Cases.pdf" target="_blank">../docs/manual-test-cases.pdf</a></li>
+        <li>Test Summary — Contract Platform (PDF): <a href="../docs/Product-QA-Summary.pdf" target="_blank">../docs/test-summary.pdf</a></li>
+        <li>Defect Log — Contract Platform (PDF): <a href="../docs/Product-Bug-Report.pdf" target="_blank">../docs/defect-log.pdf</a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Process & Traceability</h2>
+      <ul>
+        <li><strong>Mapping:</strong> Every test case links to a user story/requirement ID; summary report lists coverage and open risks.</li>
+        <li><strong>Evidence:</strong> Screenshots, HAR files, and logs attached to defects; summary includes pass/fail counts by module.</li>
+        <li><strong>Release gate:</strong> 100% smoke pass; no P0 open; P1 risk accepted by product; retest of fixes verified.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Results (Before → After)</h2>
+      <ul>
+        <li>Regression cycle time: <strong>3 days → 1.5 days</strong> (modularized cases, clearer data setup)</li>
+        <li>Missed edge-cases in approvals: <strong>5 → 0</strong> (added negative + role-based tests)</li>
+        <li>UAT rework items per release: <strong>10 → 3</strong> (early walkthrough + checklists)</li>
+      </ul>
+      <p class="note"><em>Swap in your exact numbers & timeframe.</em></p>
+    </section>
+
+    <hr />
+  </div>
+</body>
+</html>

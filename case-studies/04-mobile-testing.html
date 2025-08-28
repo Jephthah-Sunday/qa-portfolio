@@ -6,6 +6,117 @@
     <p><a href="../index.html">← Back</a></p>
     <h1>Mobile QA (Appium)</h1>
     <p class="note">Cover device coverage, UX issues caught, and any automation you built for critical user flows.</p>
-    <p>Open the Markdown template for this case study: <a href="../case-studies/04-mobile-testing.md" target="_blank">../case-studies/04-mobile-testing.md</a></p>
   </div>
 </body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mobile QA (Appium) · Case Study</title>
+  <link rel="stylesheet" href="../styles.css" />
+</head>
+<body>
+  <div class="container">
+    <p><a href="../index.html">← Back</a></p>
+
+    <h1>Mobile QA (Appium)</h1>
+    <p class="note">
+      End-to-end mobile testing on Android/iOS with Appium and a device farm (CI-driven).
+      Product names omitted for NDA compliance.
+    </p>
+
+    <section>
+      <h2>At-a-glance results</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Manual regression</h3>
+          <p><strong>240m → 48m</strong> (−80%) via smoke tagging + parallel device runs.</p>
+        </div>
+        <div class="card">
+          <h3>Flake rate</h3>
+          <p><strong>10.7% → 1.9%</strong> (last 150 runs) using a11y IDs + deterministic waits.</p>
+        </div>
+        <div class="card">
+          <h3>P0/P1 escapes</h3>
+          <p><strong>2–6 → 0</strong> across the last 2 releases with PR merge gates.</p>
+        </div>
+      </div>
+   
+    </section>
+
+    <section>
+      <h2>Scope & Context</h2>
+      <ul>
+        <li>Cross-platform app: onboarding → catalog → paywall/checkout → content access (with deep-links & offline).</li>
+        <li>Weekly releases; need fast, reliable PR signals and broader device/OS coverage.</li>
+        <li>3rd-party SDKs (IAP/analytics/push) and entitlement sync were frequent sources of regressions.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Test Design</h2>
+      <ul>
+        <li><strong>Journeys covered (smoke):</strong> login, onboarding, paywall, purchase, entitlement sync, deep-link open, offline access.</li>
+        <li><strong>Tagging:</strong> <code>@smoke</code>, <code>@regression</code>, <code>@payments</code>, <code>@offline</code>, <code>@deeplink</code>.</li>
+        <li><strong>Selectors:</strong> stable <code>testID</code>/<code>accessibilityLabel</code> on key elements for resilience.</li>
+        <li><strong>Data strategy:</strong> seeded sandbox accounts; idempotent purchase teardown; isolated tenants/build variants.</li>
+        <li><strong>Locales/timezones:</strong> data-driven sets (en-US, en-GB, fr-FR; UTC/GMT+1) to catch formatting & DST issues.</li>
+      </ul>
+
+<pre><code># high-level structure (illustrative)
+mobile/
+  appium/
+    tests/
+      login.spec.ts
+      onboarding.spec.ts
+      purchase.spec.ts
+      offline.spec.ts
+      deeplink.spec.ts
+    pageobjects/
+      Login.screen.ts
+      Paywall.screen.ts
+      Library.screen.ts
+    helpers/
+      waits.ts
+      deeplinks.ts
+    reports/   # videos/screens + HTML reports
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Device Coverage</h2>
+      <ul>
+        <li><strong>Android:</strong> 12, 13 (Pixel 6/7 class + mid-range)</li>
+        <li><strong>iOS:</strong> 16, 17 (iPhone 12/13/14)</li>
+        <li><strong>Network conditioning:</strong> Offline / 3G profiles for resilience checks.</li>
+        <li><strong>Orientation:</strong> portrait (smoke), landscape (select flows).</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>CI/CD Integration</h2>
+      <ul>
+        <li><strong>PR gate:</strong> run <code>@smoke</code> on a device matrix via cloud (videos/screenshots uploaded).</li>
+        <li><strong>Nightly:</strong> full regression incl. offline, deep-links, and purchase renewal; publish consolidated HTML report.</li>
+        <li><strong>Artifacts:</strong> step-level screenshots, videos, logs (Appium server + device), and JUnit for quick triage.</li>
+      </ul>
+
+      <details>
+        <summary>Example CI matrix (pseudo-YAML)</summary>
+<pre><code>strategy:
+  matrix:
+    os: [android-13, android-12, ios-17, ios-16]
+steps:
+  - run: npm ci
+  - run: npm run test:mobile -- --tags @smoke --os ${{ matrix.os }}
+  - uses: actions/upload-artifact@v4
+    with:
+      name: mobile-${{ matrix.os }}-reports
+      path: mobile/appium/reports/**
+</code></pre>
+      </details>
+    </section>
+
+    <section>
+      <h2>Flak
